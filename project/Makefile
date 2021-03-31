@@ -1,6 +1,6 @@
 
 # Need to link to a PRISM distribution
-PRISM_DIR = ../prism
+PRISM_DIR = ../prism/prism
 
 # For compilation, just need access to classes/jars in the PRISM distribution
 # We look in both the top-level and the prism sub-directory

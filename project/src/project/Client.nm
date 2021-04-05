@@ -1,0 +1,25 @@
+mdp
+
+module client
+  state : [0..1] init 0; // State of the job (inactive/active)
+  task  : [0..5] init 0; // Length of the job
+  
+  // Create a new job - length chose non-deterministically
+  [] state=0 -> (state'=1) & (task'=1);
+  [] state=0 -> (state'=1) & (task'=2);
+  [] state=0 -> (state'=1) & (task'=3);
+  [] state=0 -> (state'=1) & (task'=4);
+  [] state=0 -> (state'=1) & (task'=5);
+
+  // Serve the job
+  [] state=1 & task>0 -> (task'=task-1);
+
+  // Complete the job
+  [] state=1 & task=0 -> (state'=0);
+
+  //[] state=0 | task=0 -> true;
+
+endmodule
+
+
+

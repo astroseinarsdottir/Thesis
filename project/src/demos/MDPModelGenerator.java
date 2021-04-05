@@ -32,9 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import parser.State;
-import parser.VarList;
-import parser.ast.Declaration;
-import parser.ast.DeclarationBool;
 import parser.ast.DeclarationInt;
 import parser.ast.DeclarationType;
 import parser.ast.Expression;
@@ -46,8 +43,6 @@ import prism.ModelType;
 import prism.Prism;
 import prism.PrismDevNullLog;
 import prism.PrismException;
-import prism.PrismFileLog;
-import prism.PrismLangException;
 import prism.PrismLog;
 
 /**

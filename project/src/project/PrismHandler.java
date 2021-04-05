@@ -20,9 +20,16 @@ import prism.UndefinedConstants;
  */
 public class PrismHandler {
 
-    // Local variable
+    // Local variables
     private PrismLog mainLog;
     private Prism prism;
+    private ModulesFile modulesFile;
+
+    public static void main(String[] args) {
+        PrismHandler test =  new PrismHandler("Client.nm");
+        test.getModelStates();
+
+    }
 
     public PrismHandler(String prismFile) {
 
@@ -33,16 +40,30 @@ public class PrismHandler {
 
             // Initialise PRISM engine
             prism = new Prism(mainLog);
+            System.out.println("Here!");
             prism.initialise();
+            System.out.println("Here");
 
             // Parse and load a PRISM model from a file
-            ModulesFile modulesFile = prism.parseModelFile(new File(prismFile));
+            modulesFile = prism.parseModelFile(new File("src/project/models/" + prismFile));
             prism.loadPRISMModel(modulesFile);
 
         } catch (FileNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         } catch (PrismException e) {
+            System.out.println("Error: " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    public void getModelStates(){
+        try{
+            prism.exportStatesToFile(1,new File("src/project/models/test.sta"));
+
+
+        }
+        catch (Exception e){
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }

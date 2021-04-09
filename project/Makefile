@@ -5,7 +5,7 @@ PRISM_DIR = ../prism/prism
 # For compilation, just need access to classes/jars in the PRISM distribution
 # We look in both the top-level and the prism sub-directory
 # (currently svn/git repos and downloaded distributions differ in structure)
-PRISM_CLASSPATH = "$(PRISM_DIR)/classes:$(PRISM_DIR)/lib/*:$(PRISM_DIR)/prism/classes:$(PRISM_DIR)/prism/lib/*"
+PRISM_CLASSPATH = "./classes:$(PRISM_DIR)/classes:$(PRISM_DIR)/lib/*:$(PRISM_DIR)/prism/classes:$(PRISM_DIR)/prism/lib/*:./lib/*"
 
 # This Makefile just builds all java files in src and puts the class files in classes
 
@@ -25,7 +25,7 @@ classes/%.class: src/%.java
 # Test execution
 
 test:
-	PRISM_DIR=$(PRISM_DIR) PRISM_MAINCLASS=demos.ModelCheckFromFiles bin/run
+	PRISM_DIR=$(PRISM_DIR) PRISM_MAINCLASS=project.Learning bin/run
 
 # Clean up
 

@@ -78,7 +78,7 @@ public class PrismHandler {
                 String id = parts[0];
                 String values = parts[1];
 
-                statesMapper.put(id, values);
+                statesMapper.put(values, id);
             }
             myReader.close();
 
@@ -92,10 +92,10 @@ public class PrismHandler {
         }
     }
 
-    public double[][] getTransitionMatrix(int numberOfStates){
+    public int[][] getTransitionMatrix(int numberOfStates){
 
         // Data structure to store all transitions in the model
-        double [][] matrix = new double[numberOfStates][numberOfStates];
+        int [][] matrix = new int[numberOfStates][numberOfStates];
 
         try{
             // Export states from PRISM to a file
@@ -113,8 +113,6 @@ public class PrismHandler {
                 String[] parts = data.split(" ");
                 int stateFrom = Integer.parseInt(parts[0]);
                 int stateTo = Integer.parseInt(parts[2]);
-
-                System.out.println(stateFrom + " " + stateTo);
 
                 matrix[stateFrom][stateTo] = 1;
             }

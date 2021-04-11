@@ -204,7 +204,7 @@ public class ClientExample {
         multimap.put("state==1 && task==0", "action7");
 
         // Added to test conditions with ||
-        multimap.put("state==0 || task==0", "action8");
+        //multimap.put("state==0 || task==0", "action8");
     }
 
     // Return a list of possible actions that could be performed given the current

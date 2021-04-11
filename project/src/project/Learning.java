@@ -46,8 +46,7 @@ public class Learning {
     HashMap<String, String> statesMapper;  // Key: state variables; Value: ID of state;
     int [][] transitionMatrix; // To be able to know all the transitions
 
-    int steps = 100;
-
+    int steps = 15;
 
     public Learning(String prismFile){
         prismHandler = new PrismHandler(prismFile);
@@ -108,7 +107,6 @@ public class Learning {
          
     }
 
-
     // Perform a single simulation to create a trace for the system
     public ArrayList<String> generateTrace(){
         // Start the system
@@ -166,7 +164,8 @@ public class Learning {
                     learnedMatrix[stateID][j] = 0;
                     continue;
                 }
-                learnedMatrix[stateID][j] = (n_ij[stateID][j] + alpha) / ((double)numbState +  numbSuc*alpha);
+                learnedMatrix[stateID][j] =  (n_ij[stateID][j] + alpha) / ((double)numbState +  numbSuc*alpha);
+                learnedMatrix[stateID][j]  = Math.round(learnedMatrix[stateID][j]  * 10.0) / 10.0;
             }
         }
     }
@@ -190,7 +189,7 @@ public class Learning {
         else{
             return true;
         }
-
+        // TODO finish implementing
         // Check for all states s in n_s whether s <  11/10 * B(A)^2 H∗(n_s, ε, δ/m)
         /*for (Map.Entry<String, Integer> entry : n_s.entrySet()) {
             String key = entry.getKey();

@@ -59,6 +59,7 @@ public class PrismHandler {
     // Use PRISM to get the states of the model
     public HashMap<String, String> getModelStates(){
         try{
+            // TODO filename
             // Export states from PRISM to a file
             File statesFile = new File("src/project/models/test.sta");
             prism.exportStatesToFile(1,statesFile);
@@ -98,6 +99,7 @@ public class PrismHandler {
         int [][] matrix = new int[numberOfStates][numberOfStates];
 
         try{
+            // TODO filename
             // Export states from PRISM to a file
             File transitionFile = new File("src/project/models/test.tra");
             prism.exportTransToFile(false, 1, transitionFile);
@@ -121,6 +123,31 @@ public class PrismHandler {
             return matrix;
         }
         catch (Exception e){
+            System.out.println("Error: " + e.getMessage());
+            System.exit(1);
+            return null;
+        }
+    }
+
+    public String[] getModelVariables(){
+        try {
+            // TODO get the file name
+            File statesFile = new File("src/project/models/test.sta");
+            if (!statesFile.exists()) prism.exportStatesToFile(1,statesFile);
+
+            Scanner myReader = new Scanner(statesFile);
+            String variables = myReader.nextLine();
+
+            variables = variables.replace("(", "");
+            variables = variables.replace(")", "");
+            return variables.split(",");
+
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
+            System.exit(1);
+            return null;
+        } catch (PrismException e) {
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
             return null;

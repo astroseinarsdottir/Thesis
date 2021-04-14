@@ -1,5 +1,6 @@
 package project;
 
+import java.awt.*;
 import java.util.*;
 
 public class Learning {
@@ -17,7 +18,7 @@ public class Learning {
     Double delta = 0.05;
 
     // alpha > 0
-    int alpha = 20;
+    int alpha = 200;
 
     // Number of states
     int m;
@@ -45,6 +46,7 @@ public class Learning {
     PrismHandler prismHandler;
     HashMap<String, String> statesMapper;  // Key: state variables; Value: ID of state;
     int [][] transitionMatrix; // To be able to know all the transitions
+    String[] variables;
 
     int steps = 15;
 
@@ -104,7 +106,6 @@ public class Learning {
             }
             System.out.println(sum);
         }
-         
     }
 
     // Perform a single simulation to create a trace for the system
@@ -137,7 +138,7 @@ public class Learning {
 
             // Save the state visited and stop if we have a loop in our path
             if(statesVisited.containsKey(newState)){
-                statesVisited.put(newState, statesVisited.get(newState) + 1);
+                //statesVisited.put(newState, statesVisited.get(newState) + 1);
                 pathIsLoopFree = false;
             }
             else{
@@ -164,8 +165,10 @@ public class Learning {
                     learnedMatrix[stateID][j] = 0;
                     continue;
                 }
+
+
                 learnedMatrix[stateID][j] =  (n_ij[stateID][j] + alpha) / ((double)numbState +  numbSuc*alpha);
-                learnedMatrix[stateID][j]  = Math.round(learnedMatrix[stateID][j]  * 10.0) / 10.0;
+                //learnedMatrix[stateID][j]  = Math.round(learnedMatrix[stateID][j]  * 10.0) / 10.0;
             }
         }
     }
@@ -267,4 +270,6 @@ public class Learning {
     public HashMap<String, String> getModelStates(){
         return prismHandler.getModelStates();
     }
+
+    public void getModelVariables(){ variables = prismHandler.getModelVariables();}
 }

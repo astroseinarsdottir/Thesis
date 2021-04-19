@@ -64,6 +64,7 @@ public class Learning {
         m = getNumberOfStates();
         transitionMatrix = createTransitionMatrix();
         generateK_i();
+        getModelVariables();
 
         initializeN_s();
         traces = new ArrayList<ArrayList<String>>();
@@ -106,6 +107,8 @@ public class Learning {
             }
             System.out.println(sum);
         }
+        DTMCGenerator dtmcGenerator = new DTMCGenerator("Client.nm", learnedMatrix, statesMapper, variables);
+        dtmcGenerator.generateDTMC();
     }
 
     // Perform a single simulation to create a trace for the system

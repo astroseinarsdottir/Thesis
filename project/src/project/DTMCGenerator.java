@@ -10,10 +10,11 @@ import java.util.Scanner;
 
 public class DTMCGenerator {
 
-    private String orinalModel;
+    private String originalModel;
     private double[][] learnedMatrix;
     private HashMap<String, String> statesMapper;
     private String[] variables;
+    private HashMap<Integer, String[]> statesIDToValue;
 
     public static void main(String[] args) {
         DTMCGenerator dtmcGenerator = new DTMCGenerator("Client.nm", null, null, null);
@@ -21,42 +22,46 @@ public class DTMCGenerator {
     }
 
 
-    // Need the original prism model file, the learned matrix and the statesmapper
+    // Need the original prism model file, the learned matrix and the states mapper
     public DTMCGenerator(String originalModel, double[][] learnedMatrix, HashMap<String, String> statesMapper, String[] variables){
-        this.orinalModel = originalModel;
+        this.originalModel = originalModel;
         this.learnedMatrix = learnedMatrix;
         this.statesMapper = statesMapper;
         this.variables = variables;
     }
 
     public void generateDTMC(){
+        preProcessStatesMapper();
 
         // Create a new PRISM file for the DTMC
-        // TODO get the name of the file from the originalfile
-        File dtmcFile = new File("src/project/models/client.dtmc.pm");
+        // TODO get the name of the file from the original file
+        File dtmcFile = new File("src/project/models/client-dtmc.pm");
 
         try{
             dtmcFile.createNewFile();
             FileWriter myWriter = new FileWriter(dtmcFile);
 
             // Read the original PRISM file
-            Scanner myReader = new Scanner(new File("src/project/models/" + orinalModel));
+            Scanner myReader = new Scanner(new File("src/project/models/" + originalModel));
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
 
                 String strippedData = data.strip();
 
                 // Change mdp to dtcm
-                if(strippedData.equals("mdp")) myWriter.write("dtmc");
+                if(strippedData.equals("mdp")) {
+                    myWriter.write("dtmc \n");
+                    continue;
+                }
 
                 // Every line that includes [ as the first letter, skip
                 if(strippedData.startsWith("[")) continue;
 
-                // Once "endmodule" is reached, use learnedMatrix and statesmapper to create commands
+                // Once "endmodule" is reached, use learnedMatrix and states mapper to create commands
                 if(strippedData.equals("endmodule")) createCommandLines(myWriter);
 
                 // Copy any other line to new file
-                myWriter.write(data);
+                myWriter.write(data + "\n");
 
             }
             myReader.close();
@@ -76,17 +81,15 @@ public class DTMCGenerator {
 
     private void createCommandLines(FileWriter writer){
 
-        for (Map.Entry<String, String> entry : statesMapper.entrySet()) {
-            String stateValue = entry.getKey();
-            int stateID = Integer.parseInt(entry.getValue());
-
-            stateValue = stateValue.replace("(", "");
-            stateValue = stateValue.replace(")", "");
-            String[] stateValues = stateValue.split(",");
+        for (Map.Entry<Integer, String[]> entry : statesIDToValue.entrySet()) {
+            int stateID = entry.getKey();
+            String[] stateValues = entry.getValue();
 
             String command = "[]";
             for(int i = 0; i < variables.length; i++){
                 command = command + " " + variables[i] + "=" + stateValues[i];
+
+                if(variables.length > i+1) command = command + " &";
             }
             command = command + " ->";
 
@@ -97,17 +100,42 @@ public class DTMCGenerator {
                 if(needPlus) command = command + " + ";
 
                 command = command + " " + learnedMatrix[stateID][j] + " :";
+
+                String[] newStateValues = statesIDToValue.get(j);
+                for(int s = 0; s < variables.length; s++){
+                    // TODO add the update to the variables
+                    command = command + " (" + variables[s] + "'=" +newStateValues[s] + ")";
+
+                    if(variables.length > s+1) command = command + " &";
+                }
                 // TODO add the update to the variables
                 needPlus = true;
             }
+            command = command + ";";
             try {
-                writer.write(command);
+                writer.write(command + "\n");
             }
             catch (IOException e){
                 System.out.println("Error: " + e.getMessage());
                 System.exit(1);
             }
 
+        }
+    }
+
+    private void preProcessStatesMapper(){
+
+        statesIDToValue = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : statesMapper.entrySet()) {
+            String stateValue = entry.getKey();
+            int stateID = Integer.parseInt(entry.getValue());
+
+            stateValue = stateValue.replace("(", "");
+            stateValue = stateValue.replace(")", "");
+            String[] stateValues = stateValue.split(",");
+
+            statesIDToValue.put(stateID, stateValues);
         }
     }
 }

@@ -30,7 +30,7 @@ public class DTMCGenerator {
         this.variables = variables;
     }
 
-    public void generateDTMC(){
+    public String generateDTMC(){
         preProcessStatesMapper();
 
         // Create a new PRISM file for the DTMC
@@ -67,6 +67,8 @@ public class DTMCGenerator {
             myReader.close();
             myWriter.close();
 
+
+
         }
         catch (FileNotFoundException e){
             System.out.println("Error: " + e.getMessage());
@@ -76,7 +78,7 @@ public class DTMCGenerator {
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }
-
+        return "client-dtmc.pm";
     }
 
     private void createCommandLines(FileWriter writer){

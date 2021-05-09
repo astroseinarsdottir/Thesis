@@ -36,22 +36,28 @@ public class Learning {
     // Data structure for A (transition matrix)
     double [][] learnedMatrix;
 
+    // Data structure for B(A)
+    HashMap<String, Double> B;
+
     // Data structure to keep track of n_ij
     int [][] n_ij;
 
     // Data structure for k_i
     HashMap<Integer, Integer> k_i = new HashMap<Integer, Integer>();
 
+    // Data structure for backward reachability analysis
+    public HashMap<Integer, Set<Integer>> reachability = new HashMap<>();
+
     // PRISM variables
     PrismHandler prismHandler;
     HashMap<String, String> statesMapper;  // Key: state variables; Value: ID of state;
     int [][] transitionMatrix; // To be able to know all the transitions
     String[] variables;
-
-    int steps = 15;
+    String originalPrismFile;
 
     public Learning(String prismFile){
         prismHandler = new PrismHandler(prismFile);
+        originalPrismFile = prismFile;
 
         performLearning();
     }
@@ -70,6 +76,7 @@ public class Learning {
         traces = new ArrayList<ArrayList<String>>();
         n_ij = new int[m][m];
         initializeLearnedMatrix();
+        performBackwardReachabilty();
 
         boolean notReached = true;
 
@@ -107,7 +114,7 @@ public class Learning {
             }
             System.out.println(sum);
         }
-        DTMCGenerator dtmcGenerator = new DTMCGenerator("Client.nm", learnedMatrix, statesMapper, variables);
+        DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
         dtmcGenerator.generateDTMC();
     }
 
@@ -169,7 +176,6 @@ public class Learning {
                     continue;
                 }
 
-
                 learnedMatrix[stateID][j] =  (n_ij[stateID][j] + alpha) / ((double)numbState +  numbSuc*alpha);
                 //learnedMatrix[stateID][j]  = Math.round(learnedMatrix[stateID][j]  * 10.0) / 10.0;
             }
@@ -182,38 +188,43 @@ public class Learning {
 
     // Compute B(A) for the stopping condition
     public void computeB(){
-        // TODO compute using PRISM
+        B = new HashMap<>();
+
+        DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
+        String dtmc = dtmcGenerator.generateDTMC();
+
+        PrismHandler dtmcHandler = new PrismHandler(dtmc);
+
+        for (String state : statesMapper.keySet()) {
+            B.put(state, dtmcHandler.computeCond(state, statesMapper, variables, reachability.get(Integer.parseInt(statesMapper.get(state)))));
+        }
+
     }
 
     // After each new trace has been added, compute if stopping condition has been reached
     public boolean stoppingConditionReached(){
 
-        if(steps > 0){
-            steps--;
-            return false;
-        }
-        else{
-            return true;
-        }
-        // TODO finish implementing
         // Check for all states s in n_s whether s <  11/10 * B(A)^2 H∗(n_s, ε, δ/m)
-        /*for (Map.Entry<String, Integer> entry : n_s.entrySet()) {
+        for(Map.Entry<String, Integer> entry : n_s.entrySet()) {
             String key = entry.getKey();
             Integer value = entry.getValue();
-            
+
+            if(isStateStochastic(value)) continue;
+
+            if(value == 0) return false;
+
             if(value < checkState(key, value)){
                 return false;
             }
         }
-        return true;*/
+        return true;
     }
 
     public double checkState(String state, int value){
-        // TODO Implement computation of  11/10 * B(A)^2 H∗(n_s, ε, δ/m)
+        // Computation of  11/10 * B(A)^2 H∗(n_s, ε, δ/m)
 
         double h = computeH(Integer.parseInt(statesMapper.get(state)), value);
-        double condition = 11/10; // Add other things here
-        return value;
+        return Math.sqrt( (11/10)*B.get(state) )* h;
     }
 
     // Computes maxj∈S( H(n_i, n_ij,ε,δ′) where δ′ = δ/m_stoc
@@ -264,6 +275,38 @@ public class Learning {
 
     public int getNumberOfStates(){
         return statesMapper.size();
+    }
+
+    public void performBackwardReachabilty(){
+
+        // For each state i in the model
+        for(int i = 0; i < m; i++){
+            // Start with i as the only state in W and R
+            Set<Integer> W = new HashSet<>();
+            Set<Integer> R = new HashSet<>();
+            W.add(i);
+            R.add(i);
+
+            // Repeat for each state in W until no new states can be added to W
+            while (!W.isEmpty()){
+                int state = W.iterator().next();
+                int[] row = transitionMatrix[state];
+                // Use transitionMatrix to find all states t that have transition to i
+                for(int j = 0; j < row.length; j++){
+                    if(row[j] == 0) continue;
+
+                    // If t not already in R, add t to R (reachable) and W (working set)
+                    if(!R.contains(j)){
+                        R.add(j);
+                        W.add(j);
+                    }
+                }
+                // Remove current state from W
+                W.remove(state);
+            }
+            // Save R to some data structure so it can be used later
+            reachability.put(i, R);
+        }
     }
 
     public int[][] createTransitionMatrix(){

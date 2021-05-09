@@ -2,18 +2,12 @@ package project;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 import parser.Values;
 import parser.ast.ModulesFile;
 import parser.ast.PropertiesFile;
-import prism.Prism;
-import prism.PrismDevNullLog;
-import prism.PrismException;
-import prism.PrismLog;
-import prism.Result;
-import prism.UndefinedConstants;
+import prism.*;
 
 
 /*
@@ -152,6 +146,73 @@ public class PrismHandler {
             System.exit(1);
             return null;
         }
+    }
+
+    public double computeCond(String state, HashMap<String, String> statesMapper, String[] variables, Set<Integer> R){
+        int l = 0;
+        double cond = 0;
+
+        int stateID = Integer.parseInt(statesMapper.get(state));
+
+        //  the set of states R*("state"), that can reach "state", not including "state"
+        Set<Integer> RStar = new HashSet<>();
+        RStar.addAll(R);
+        RStar.remove(stateID);
+
+        HashMap<Integer, String[]> statesIDToValue = preProcessStatesMapper(statesMapper);
+
+        List<String> states = new ArrayList<>();
+        for(int rStates : RStar){
+            String[] stateValues = statesIDToValue.get(rStates);
+            String command = "(";
+            for(int i = 0; i < variables.length; i++){
+                command = command + variables[i] + "=" + stateValues[i];
+
+                if(variables.length > i+1) command = command + " &";
+                else command = command + ")";
+            }
+            states.add(command);
+        }
+        while(cond <= 0){
+            try {
+
+                // Compute cond for all states in R*, continue until cond >0
+                l = l+1;
+                String propertyString = "filter(min, P=? [F<="+ l+ "!(" + String.join("|", states) + ")], " + String.join(" | ", states) + ")";
+
+                PropertiesFile propertiesFile = prism.parsePropertiesString(modulesFile, propertyString);
+                //System.out.println(propertiesFile.getPropertyObject(0));
+                Result result = prism.modelCheck(propertiesFile, propertiesFile.getPropertyObject(0));
+
+                cond = Double.parseDouble(result.toString());
+
+            } catch (PrismLangException e) {
+                System.out.println("Error: " + e.getMessage());
+                System.exit(1);
+            }
+            catch (PrismException e){
+                System.out.println("Error: " + e.getMessage());
+                System.exit(1);
+            }
+        }
+        return l/cond;
+    }
+
+    private HashMap<Integer, String[]> preProcessStatesMapper(HashMap<String, String> statesMapper){
+
+        HashMap<Integer, String[]> statesIDToValue = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : statesMapper.entrySet()) {
+            String stateValue = entry.getKey();
+            int stateID = Integer.parseInt(entry.getValue());
+
+            stateValue = stateValue.replace("(", "");
+            stateValue = stateValue.replace(")", "");
+            String[] stateValues = stateValue.split(",");
+
+            statesIDToValue.put(stateID, stateValues);
+        }
+        return statesIDToValue;
     }
 
 }

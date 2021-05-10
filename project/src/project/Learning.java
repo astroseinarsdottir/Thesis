@@ -12,13 +12,13 @@ public class Learning {
     // Algorithm variables
 
     // Error bound 1
-    Double epsilon = 0.1;
+    double epsilon = 0.1;
 
     // Error bound 2
-    Double delta = 0.05;
+    double delta = 0.05;
 
     // alpha > 0
-    int alpha = 200;
+    int alpha = 100;
 
     // Number of states
     int m;
@@ -79,8 +79,9 @@ public class Learning {
         performBackwardReachabilty();
 
         boolean notReached = true;
-
+        int count = 0;
         while(notReached){
+            count++;
             // Generate a new trace for the system
             traces.add(generateTrace());
 
@@ -116,6 +117,7 @@ public class Learning {
         }
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
         dtmcGenerator.generateDTMC();
+        System.out.println("Steps: " + count);
     }
 
     // Perform a single simulation to create a trace for the system
@@ -209,7 +211,7 @@ public class Learning {
             String key = entry.getKey();
             Integer value = entry.getValue();
 
-            if(isStateStochastic(value)) continue;
+            if(!isStateStochastic(Integer.parseInt(statesMapper.get(key)))) continue;
 
             if(value == 0) return false;
 
@@ -224,7 +226,11 @@ public class Learning {
         // Computation of  11/10 * B(A)^2 H∗(n_s, ε, δ/m)
 
         double h = computeH(Integer.parseInt(statesMapper.get(state)), value);
-        return Math.sqrt( (11/10)*B.get(state) )* h;
+        /*System.out.println("Checking state: " + state + " With value: " + value);
+        System.out.println("Check state: " + Math.pow( (11.0/10.0)*B.get(state), 2 )* h);
+        System.out.println("H: "+ h);
+        System.out.println("B: " + B.get(state));*/
+        return Math.pow( (11.0/10.0)*B.get(state), 2 )* h;
     }
 
     // Computes maxj∈S( H(n_i, n_ij,ε,δ′) where δ′ = δ/m_stoc
@@ -233,11 +239,13 @@ public class Learning {
 
         double max = 0;
         for(int i = 0; i < m; i++){
-            double chen = (2/Math.pow(epsilon, 2)) * Math.log(2/deltaPrime) *
-                    (1/4 - Math.pow(Math.abs((1/2) - (1/value)*n_ij[state][i]) - (2/3)*epsilon, 2) );
-            if (chen > max) max = chen;
+
+            double part = Math.abs((0.5) - (1.0/value)*n_ij[state][i]);
+            if (part > max) max = part;
         }
-        return max;
+        double chen = (2.0/Math.pow(epsilon, 2)) * Math.log(2.0/deltaPrime) *
+                (0.25 - Math.pow(max - (2.0/3.0)*epsilon, 2) );
+        return chen;
     }
 
     public void initializeN_s(){

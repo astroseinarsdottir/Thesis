@@ -195,7 +195,7 @@ public class PrismHandler {
                 System.exit(1);
             }
         }
-        return l/cond;
+        return (double) l/cond;
     }
 
     private HashMap<Integer, String[]> preProcessStatesMapper(HashMap<String, String> statesMapper){

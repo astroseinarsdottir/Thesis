@@ -1,0 +1,6 @@
+        Set<String> allKeys = multimap.keySet();
+
+        Collection<String> possibleAction = new ArrayList<String>();
+
+        try {
+            ScriptEngine graalEngine = new ScriptEngineManager().getEngineByName("Graal.js");

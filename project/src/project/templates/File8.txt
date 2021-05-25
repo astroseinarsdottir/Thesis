@@ -1,0 +1,4 @@
+    }
+
+    // Return a list of possible actions that could be performed given the current
+    // state (value of variables)

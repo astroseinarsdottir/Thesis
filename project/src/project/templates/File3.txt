@@ -1,0 +1,9 @@
+
+        generateConditionMap();
+
+        try {
+            runSimulation(numSteps);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }

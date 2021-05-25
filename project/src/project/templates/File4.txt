@@ -1,0 +1,8 @@
+
+        generateConditionMap();
+    }
+
+    // Perform a single step in the system
+    public String performSingleStep() {
+
+        // Find out which transistions could be taken given the state

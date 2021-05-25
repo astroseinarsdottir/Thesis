@@ -1,0 +1,9 @@
+
+    // Multimap where the key = the condition (as a string), values = list of
+    // transitions corresponding to that condition
+    Multimap<String, String> multimap;
+
+    // Used currently to choose which action to perform next
+    Random random = new Random();
+
+    public static void main(String[] args) {

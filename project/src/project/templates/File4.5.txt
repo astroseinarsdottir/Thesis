@@ -1,0 +1,31 @@
+
+        String action = "";
+
+        // If there is only 1 possible actions, then that is the action performed by
+        // default.
+        if (possibleActions.size() == 1) {
+            action = possibleActions.iterator().next();
+        }
+        // Otherwise, we have to choose which of the possible actions to perform next.
+        // Use a random number generator to decide which transition to take next
+        // Use thread that simulates the user, with different distributions to decide
+        // which action to take.
+        else {
+            action = chooseAction(possibleActions);
+        }
+
+        // Perform the transision
+        try {
+            executeAction(action);
+        } catch (Exception e) {
+            // Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return action;
+    }
+
+    // Perform the transision/action given as parameter
+    public void executeAction(String action) throws Exception {
+
+        switch (action) {

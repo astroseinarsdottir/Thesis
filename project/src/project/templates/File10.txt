@@ -1,0 +1,24 @@
+
+            for (String condition : allKeys) {
+                Object result = graalEngine.eval("eval('" + condition + "');");
+                if (Boolean.TRUE.equals(result)) {
+                    possibleAction.addAll(multimap.get(condition));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return possibleAction;
+
+    }
+
+    //// Helper functions for the learning algorithm ////
+
+    public int getNumberofTransitions(){
+        return multimap.values().size();
+    }
+
+    public Collection<String> getListOfTransitions(){
+        return multimap.values();
+    }

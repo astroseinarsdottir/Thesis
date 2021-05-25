@@ -1,0 +1,13 @@
+
+    // Choose which action to perform next out of many possible actions.
+    // Currently chooses action by random, but could later by extended to simulate
+    // user choose/bias
+    public String chooseAction(Collection<String> possibleActions) {
+        ArrayList<String> listActions = new ArrayList<>(possibleActions);
+        return listActions.get(random.nextInt(listActions.size()));
+    }
+
+    // Create the map where we can look up transitions by their conditions
+    public void generateConditionMap() {
+        multimap = ArrayListMultimap.create();
+

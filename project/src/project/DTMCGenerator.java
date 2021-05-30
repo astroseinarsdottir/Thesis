@@ -42,7 +42,7 @@ public class DTMCGenerator {
             FileWriter myWriter = new FileWriter(dtmcFile);
 
             // Read the original PRISM file
-            Scanner myReader = new Scanner(new File("src/project/models/" + originalModel));
+            Scanner myReader = new Scanner(new File(originalModel));
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
 
@@ -78,7 +78,7 @@ public class DTMCGenerator {
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }
-        return "client-dtmc.pm";
+        return "src/project/models/client-dtmc.pm";
     }
 
     private void createCommandLines(FileWriter writer){

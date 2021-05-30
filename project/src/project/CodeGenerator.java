@@ -21,7 +21,7 @@ public class CodeGenerator {
         generateCode();
     }
 
-    public void generateCode(){
+    public String generateCode(){
         File prismFile = new File(prismFileString);
 
         readPrismFile(prismFile);
@@ -161,6 +161,7 @@ public class CodeGenerator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return className;
     }
 
     public void readAndWriteFromFile(String inputFile, BufferedWriter outputStream) throws IOException {
@@ -230,7 +231,6 @@ public class CodeGenerator {
                         // Save many updates
                         for (String part: updates) {
                             part = part.strip();
-                            System.out.println("Part:"+part);
                             String[] parts = part.split("'=");
                             action.addVariableToUpdate(parts[0]);
                             action.addUpdate(parts[1]);
@@ -247,15 +247,8 @@ public class CodeGenerator {
             }
 
             myReader.close();
-            System.out.println(variables);
-            for (ModelAction action: actions) {
-                System.out.println(action);
-            }
-
 
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
             e.printStackTrace();
         }
     }

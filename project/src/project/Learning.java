@@ -6,7 +6,7 @@ import java.util.*;
 public class Learning {
     
     public static void main(String[] args) {
-        Learning learning = new Learning("Client.nm");
+        //Learning learning = new Learning("Client.nm");
     }
 
     // Algorithm variables
@@ -55,10 +55,13 @@ public class Learning {
     String[] variables;
     String originalPrismFile;
 
-    public Learning(String prismFile){
+    Implementation implementation;
+
+    public Learning(String prismFile, Implementation implementation){
         prismHandler = new PrismHandler(prismFile);
         originalPrismFile = prismFile;
 
+        this.implementation = implementation;
         performLearning();
     }
 
@@ -116,31 +119,31 @@ public class Learning {
             System.out.println(sum);
         }
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
-        dtmcGenerator.generateDTMC();
+        System.out.println("DTMC PRISM file at: "+dtmcGenerator.generateDTMC());
         System.out.println("Steps: " + count);
     }
 
     // Perform a single simulation to create a trace for the system
     public ArrayList<String> generateTrace(){
         // Start the system
-        ClientExample client = new ClientExample();
+        Implementation model = implementation;
         ArrayList<String> trace = new ArrayList<>();
 
         // Refresh the states visited
         statesVisited = new HashMap<String, Integer>();
         
         // Save the initial state 
-        statesVisited.put(client.getSystemState(), 1);
-        trace.add(client.getSystemState());
+        statesVisited.put(model.getSystemState(), 1);
+        trace.add(model.getSystemState());
 
         boolean pathIsLoopFree = true;
         while(pathIsLoopFree){
-            String oldState = client.getSystemState();
+            String oldState = model.getSystemState();
 
             // Move one transition in the system
-            String actionTaken = client.performSingleStep();
+            String actionTaken = model.performSingleStep();
 
-            String newState = client.getSystemState();
+            String newState = model.getSystemState();
             trace.add(newState);
 
             // Update n_ij matrix
@@ -154,7 +157,7 @@ public class Learning {
                 pathIsLoopFree = false;
             }
             else{
-                statesVisited.put(client.getSystemState(), 1);
+                statesVisited.put(model.getSystemState(), 1);
             }   
         }
         return trace;

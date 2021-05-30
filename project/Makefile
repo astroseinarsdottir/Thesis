@@ -25,7 +25,7 @@ classes/%.class: src/%.java
 # Test execution
 
 test:
-	PRISM_DIR=$(PRISM_DIR) PRISM_MAINCLASS=project.Learning bin/run
+	PRISM_DIR=$(PRISM_DIR) PRISM_MAINCLASS=project.Main bin/run
 
 # Clean up
 

@@ -1,0 +1,8 @@
+P=? [ (state=1) & (task=1) => (F<=1 (state=1) & (task=0) ) ]  
+
+filter(print, P=? [F<=1 ((state=1) & (task=1) => (state=1) & (task=5))])
+
+filter(max, P=? [F=1 (state=1 & task=5)])
+
+filter(min, P=? [ F<=1 !((state=0&task=0)|(state=1&task=0)|(state=1&task=1)|(state=1&task=3)|(state=1&task=4)|(state=1&task=5)) ], (state=0&task=0)) 
+

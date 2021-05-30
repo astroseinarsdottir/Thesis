@@ -38,7 +38,7 @@ public class PrismHandler {
             prism.initialise();
 
             // Parse and load a PRISM model from a file
-            modulesFile = prism.parseModelFile(new File("src/project/models/" + prismFile));
+            modulesFile = prism.parseModelFile(new File(prismFile));
             prism.loadPRISMModel(modulesFile);
 
         } catch (FileNotFoundException e) {

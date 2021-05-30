@@ -9,4 +9,5 @@ public abstract class Implementation {
     abstract void runSimulation(int steps) throws Exception;
     abstract String chooseAction(Collection<String> possibleActions);
     abstract void generateConditionMap();
+    abstract String getSystemState();
 }

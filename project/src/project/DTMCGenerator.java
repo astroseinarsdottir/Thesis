@@ -35,14 +35,17 @@ public class DTMCGenerator {
 
         // Create a new PRISM file for the DTMC
         // TODO get the name of the file from the original file
-        File dtmcFile = new File("src/project/models/client-dtmc.pm");
+        File originalFile = new File(originalModel);
+        String fileName = originalFile.getName().replaceFirst("[.][^.]+$", "");
+
+        File dtmcFile = new File("src/project/models/"+fileName+"-dtmc.pm");
 
         try{
             dtmcFile.createNewFile();
             FileWriter myWriter = new FileWriter(dtmcFile);
 
             // Read the original PRISM file
-            Scanner myReader = new Scanner(new File(originalModel));
+            Scanner myReader = new Scanner(originalFile);
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
 
@@ -78,7 +81,7 @@ public class DTMCGenerator {
             System.out.println("Error: " + e.getMessage());
             System.exit(1);
         }
-        return "src/project/models/client-dtmc.pm";
+        return "src/project/models/"+fileName+"-dtmc.pm";
     }
 
     private void createCommandLines(FileWriter writer){

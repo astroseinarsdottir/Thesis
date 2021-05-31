@@ -218,6 +218,10 @@ public class CodeGenerator {
                     condition = condition.replace("=", "==")
                             .replace("&", "&&")
                             .replace("|", "||");
+                    condition = condition.replace(">==", ">=")
+                            .replace("<==", "<=")
+                            .replace("==>", "=>")
+                            .replace("==<", "=<");
                     action.setCondition(condition);
 
                     // Update

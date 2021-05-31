@@ -101,6 +101,10 @@ public class Learning {
             // Compute B (for the stopping condition)
             computeB();
 
+            if(count % 50 == 0){
+                System.out.println("Learning...");
+            }
+
             notReached = !stoppingConditionReached();
         }
 
@@ -120,7 +124,7 @@ public class Learning {
         }
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
         System.out.println("DTMC PRISM file at: "+dtmcGenerator.generateDTMC());
-        System.out.println("Steps: " + count);
+        System.out.println("Total steps: " + count);
     }
 
     // Perform a single simulation to create a trace for the system
@@ -201,6 +205,7 @@ public class Learning {
         PrismHandler dtmcHandler = new PrismHandler(dtmc);
 
         for (String state : statesMapper.keySet()) {
+            if(!isStateStochastic(Integer.parseInt(statesMapper.get(state)))) continue;
             B.put(state, dtmcHandler.computeCond(state, statesMapper, variables, reachability.get(Integer.parseInt(statesMapper.get(state)))));
         }
 

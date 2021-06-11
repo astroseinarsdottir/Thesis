@@ -306,10 +306,10 @@ public class Learning {
             // Repeat for each state in W until no new states can be added to W
             while (!W.isEmpty()){
                 int state = W.iterator().next();
-                int[] row = transitionMatrix[state];
+
                 // Use transitionMatrix to find all states t that have transition to i
-                for(int j = 0; j < row.length; j++){
-                    if(row[j] == 0) continue;
+                for(int j = 0; j < m; j++){
+                    if(transitionMatrix[j][state] == 0) continue;
 
                     // If t not already in R, add t to R (reachable) and W (working set)
                     if(!R.contains(j)){

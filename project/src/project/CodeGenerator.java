@@ -24,7 +24,11 @@ public class CodeGenerator {
     public String generateCode(){
         File prismFile = new File(prismFileString);
 
-        readPrismFile(prismFile);
+        try {
+            readPrismFile(prismFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         // Create new java file for the model
         String className = prismFile.getName().replaceFirst("[.][^.]+$", "");
@@ -176,10 +180,13 @@ public class CodeGenerator {
         inputStream.close();
     }
 
-    private void readPrismFile(File prismFile){
+    private void readPrismFile(File prismFile) throws Exception {
         variables = new ArrayList<>();
         actions = new ArrayList<>();
 
+        if(!prismFile.getName().endsWith(".nm")){
+            throw new Exception("File not of correct format. Input can only be .nm files.");
+        }
         try {
             // Start reading through the PRISM file
             Scanner myReader = new Scanner(prismFile);

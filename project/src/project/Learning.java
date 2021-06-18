@@ -1,6 +1,8 @@
 package project;
 
 import java.awt.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Learning {
@@ -55,9 +57,10 @@ public class Learning {
     String[] variables;
     String originalPrismFile;
 
-    Implementation implementation;
+    //Implementation implementation;
+    Class<?> implementation;
 
-    public Learning(String prismFile, Implementation implementation){
+    public Learning(String prismFile, Class<?> implementation){
         prismHandler = new PrismHandler(prismFile);
         originalPrismFile = prismFile;
 
@@ -67,6 +70,7 @@ public class Learning {
 
     // The whole learning algorithm
     public void performLearning(){
+        long startTime = System.currentTimeMillis();
 
         // Extract information about the model
         statesMapper = getModelStates();
@@ -81,13 +85,23 @@ public class Learning {
         initializeLearnedMatrix();
         performBackwardReachabilty();
 
+        long traceWatch = 0;
+        long updateMatrixWatch = 0;
+        long BWatch = 0;
+        long stopCondWatch = 0;
+
         boolean notReached = true;
         int count = 0;
         while(notReached){
             count++;
             // Generate a new trace for the system
-            traces.add(generateTrace());
 
+            long startTrace = System.currentTimeMillis();
+            traces.add(generateTrace());
+            long endTrace = System.currentTimeMillis();
+            traceWatch = traceWatch + (endTrace - startTrace);
+
+            long startMatrix = System.currentTimeMillis();
             // Update n_s
             for (Map.Entry<String, Integer> entry : statesVisited.entrySet()) {
                 String key = entry.getKey();
@@ -95,20 +109,36 @@ public class Learning {
 
                 n_s.put(key, n_s.get(key) + value);
             }
+
             // Compute A (transition matrix)
             computeTransitionMatrix();
+            long endMatrix = System.currentTimeMillis();
+            updateMatrixWatch = updateMatrixWatch + (endMatrix - startMatrix);
 
             // Compute B (for the stopping condition)
+            long startB = System.currentTimeMillis();
             computeB();
+            long endB = System.currentTimeMillis();
+            BWatch = BWatch + (endB - startB);
 
-            if(count % 50 == 0){
-                System.out.println("Learning...");
+            if(count % 100 == 0){
+                System.out.println("Learning from "+count+" samples...");
             }
-
+            long startStopCond = System.currentTimeMillis();
             notReached = !stoppingConditionReached();
+            long endStopCond = System.currentTimeMillis();
+            stopCondWatch = stopCondWatch + (endStopCond - startStopCond);
         }
 
-        for (double[] row : learnedMatrix)
+        long endTime = System.currentTimeMillis();
+        long duration = (endTime - startTime);
+        System.out.println("Duration of learning algorithm: " + duration);
+        System.out.println("Duration of generating traces: "+ traceWatch);
+        System.out.println("Duration of updating matrix: "+ updateMatrixWatch);
+        System.out.println("Duration of computing B: "+ BWatch);
+        System.out.println("Duration of computing stopping condition: "+ stopCondWatch);
+
+        /*for (double[] row : learnedMatrix)
 
             // converting each row as string
             // and then printing in a separate line
@@ -121,16 +151,26 @@ public class Learning {
                 sum = sum + row[i];
             }
             System.out.println(sum);
-        }
+        }*/
+        long startTime2 = System.currentTimeMillis();
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
         System.out.println("DTMC PRISM file at: "+dtmcGenerator.generateDTMC());
         System.out.println("Total steps: " + count);
+
+        long endTime2 = System.currentTimeMillis();
+        long duration2 = (endTime2 - startTime2);
+        System.out.println("Duration of generating model: " + duration2);
     }
 
     // Perform a single simulation to create a trace for the system
     public ArrayList<String> generateTrace(){
         // Start the system
-        Implementation model = implementation;
+        Implementation model = null;
+        try {
+            model = (Implementation) implementation.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         ArrayList<String> trace = new ArrayList<>();
 
         // Refresh the states visited
@@ -200,14 +240,19 @@ public class Learning {
         B = new HashMap<>();
 
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
+        //System.out.println("DTMC Generator initialized");
         String dtmc = dtmcGenerator.generateDTMC();
+        //System.out.println("DTMC created");
 
         PrismHandler dtmcHandler = new PrismHandler(dtmc);
+        //System.out.println("PrismHandler initialized");
 
         for (String state : statesMapper.keySet()) {
             if(!isStateStochastic(Integer.parseInt(statesMapper.get(state)))) continue;
+            //System.out.println("Computing B for state: " + state+ " With Reachability: "+reachability.get(Integer.parseInt(statesMapper.get(state))));
             B.put(state, dtmcHandler.computeCond(state, statesMapper, variables, reachability.get(Integer.parseInt(statesMapper.get(state)))));
         }
+        dtmcHandler.closePrism();
 
     }
 

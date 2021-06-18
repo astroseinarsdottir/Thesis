@@ -24,8 +24,3 @@
 
         return action;
     }
-
-    // Perform the transision/action given as parameter
-    public void executeAction(String action) throws Exception {
-
-        switch (action) {

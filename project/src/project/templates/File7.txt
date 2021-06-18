@@ -7,7 +7,4 @@
         return listActions.get(random.nextInt(listActions.size()));
     }
 
-    // Create the map where we can look up transitions by their conditions
-    public void generateConditionMap() {
-        multimap = ArrayListMultimap.create();
 

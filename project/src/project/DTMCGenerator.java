@@ -34,7 +34,6 @@ public class DTMCGenerator {
         preProcessStatesMapper();
 
         // Create a new PRISM file for the DTMC
-        // TODO get the name of the file from the original file
         File originalFile = new File(originalModel);
         String fileName = originalFile.getName().replaceFirst("[.][^.]+$", "");
 

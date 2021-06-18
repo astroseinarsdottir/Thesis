@@ -1,8 +1,4 @@
-        default:
-            throw new Exception("No action chosen");
-        }
 
-    }
 
     // Runs the simulation for the system with the desired number of steps
     public void runSimulation(int steps) throws Exception {

@@ -5,9 +5,9 @@ import java.text.MessageFormat;
 public class ModelVariable {
 
     private String name;
-    private char rangeFrom;
-    private char rangeTo;
-    private char initialState;
+    private String rangeFrom;
+    private String rangeTo;
+    private String initialState;
 
     public ModelVariable(){
 
@@ -20,24 +20,24 @@ public class ModelVariable {
         return name;
     }
 
-    public void setRangeFrom(char rangeFrom){
+    public void setRangeFrom(String rangeFrom){
         this.rangeFrom = rangeFrom;
     }
-    public char getRangeFrom(){
+    public String getRangeFrom(){
         return rangeFrom;
     }
 
-    public void setRangeTo(char rangeTo){
+    public void setRangeTo(String rangeTo){
         this.rangeTo = rangeTo;
     }
-    public char getRangeTo(){
+    public String getRangeTo(){
         return rangeTo;
     }
 
-    public void setInitialState(char initialState){
+    public void setInitialState(String initialState){
         this.initialState = initialState;
     }
-    public char getInitialState(){
+    public String getInitialState(){
         return initialState;
     }
 

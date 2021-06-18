@@ -87,18 +87,30 @@ public class CodeGenerator {
             readAndWriteFromFile("src/project/templates/File4.5.txt", outputStream);
             outputStream.newLine();
 
-            int count = 0;
-            for (ModelAction action: actions) {
-                outputStream.write("        case \"action"+count+"\":\n");
+            if(actions.size()> 1500){
+                splitExecuteActions(outputStream);
+            }
+            else{
+                outputStream.write("    // Perform the transision/action given as parameter\n");
+                outputStream.write("    public void executeAction(String action) throws Exception {\n");
+                outputStream.write("        switch (action) {\n");
+                int count = 0;
+                for (ModelAction action: actions) {
+                    outputStream.write("        case \"action"+count+"\":\n");
 
-                List<String> variable = action.getVariablesToUpdate();
-                List<String> update = action.getUpdates();
-                for (int i = 0; i < action.getVariablesToUpdate().size(); i++) {
-                    outputStream.write("            set"+variable.get(i)+"("+update.get(i)+");\n");
+                    List<String> variable = action.getVariablesToUpdate();
+                    List<String> update = action.getUpdates();
+                    for (int i = 0; i < action.getVariablesToUpdate().size(); i++) {
+                        outputStream.write("            set"+variable.get(i)+"("+update.get(i)+");\n");
+                    }
+                    outputStream.write("            break;");
+                    outputStream.newLine();
+                    count++;
                 }
-                outputStream.write("            break;");
-                outputStream.newLine();
-                count++;
+                outputStream.write("        default:\n");
+                outputStream.write("            throw new Exception(\"No action chosen\");\n");
+                outputStream.write("        }\n");
+                outputStream.write("    }\n");
             }
 
             readAndWriteFromFile("src/project/templates/File5.txt", outputStream);
@@ -124,10 +136,18 @@ public class CodeGenerator {
             }
             readAndWriteFromFile("src/project/templates/File7.txt", outputStream);
 
-            for (int i = 0; i < actions.size(); i++) {
-                outputStream.write("        multimap.put(\""+actions.get(i).getCondition()+"\", \"action"+i+"\");");
-                outputStream.newLine();
+            if(actions.size()> 1500){
+                splitGenerateConditionMap(outputStream);
+            }else {
+                outputStream.write("    // Create the map where we can look up transitions by their conditions\n");
+                outputStream.write("    public void generateConditionMap() {\n");
+                outputStream.write("        multimap = ArrayListMultimap.create();");
+                for (int i = 0; i < actions.size(); i++) {
+                    outputStream.write("        multimap.put(\""+actions.get(i).getCondition()+"\", \"action"+i+"\");");
+                    outputStream.newLine();
+                }
             }
+
 
             readAndWriteFromFile("src/project/templates/File8.txt", outputStream);
 
@@ -203,12 +223,12 @@ public class CodeGenerator {
                     variable.setName(varData[0].strip());
 
                     String varRange = varData[1].stripLeading();
-                    variable.setRangeFrom(varRange.charAt(1));
-                    variable.setRangeTo(varRange.charAt(4));
+                    variable.setRangeFrom(varRange.substring(varRange.indexOf("[") + 1, varRange.indexOf("..")));
+                    variable.setRangeTo(varRange.substring(varRange.indexOf("..") + 2, varRange.indexOf("]")));
 
                     if(varRange.contains("init")){
                         String init = varRange.substring(varRange.indexOf("init")+4).stripLeading();
-                        variable.setInitialState(init.charAt(0));
+                        variable.setInitialState(init.substring(0, init.indexOf(";")));
                     }
                     variables.add(variable);
                 }
@@ -261,6 +281,67 @@ public class CodeGenerator {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void splitExecuteActions(BufferedWriter outputStream) throws IOException {
+
+        int count = 0;
+        int numbMethods = 0;
+        for (ModelAction action: actions) {
+            if(count % 1500 == 0){
+                if(count > 0){
+                    outputStream.write("        }\n");
+                    outputStream.write("    }\n");
+                }
+                outputStream.write("    // Perform the transision/action given as parameter\n");
+                outputStream.write("    public void executeAction"+numbMethods+"(String action) throws Exception {\n");
+                outputStream.write("        switch (action) {\n");
+                numbMethods++;
+            }
+            outputStream.write("        case \"action"+count+"\":\n");
+
+            List<String> variable = action.getVariablesToUpdate();
+            List<String> update = action.getUpdates();
+            for (int i = 0; i < action.getVariablesToUpdate().size(); i++) {
+                outputStream.write("            set"+variable.get(i)+"("+update.get(i)+");\n");
+            }
+            outputStream.write("            break;");
+            outputStream.newLine();
+            count++;
+        }
+        outputStream.write("        }\n");
+        outputStream.write("    }\n");
+
+        outputStream.write("    // Perform the transision/action given as parameter\n");
+        outputStream.write("    public void executeAction(String action) throws Exception {\n");
+        for(int i=0;i<numbMethods;i++){
+            outputStream.write("        executeAction"+i+"(action);\n");
+        }
+        outputStream.write("    }\n");
+
+    }
+
+    private void splitGenerateConditionMap(BufferedWriter outputStream) throws IOException{
+        int numbMethods = 0;
+        for (int i = 0; i < actions.size(); i++) {
+            if(i % 1500 == 0) {
+                if (i > 0) {
+                    outputStream.write("    }\n");
+                }
+                outputStream.write("    // Create the map where we can look up transitions by their conditions\n");
+                outputStream.write("    public void generateConditionMap"+numbMethods+"() {\n");
+                numbMethods++;
+            }
+            outputStream.write("        multimap.put(\""+actions.get(i).getCondition()+"\", \"action"+i+"\");");
+            outputStream.newLine();
+        }
+        outputStream.write("    }\n");
+        outputStream.write("    // Create the map where we can look up transitions by their conditions\n");
+        outputStream.write("    public void generateConditionMap() {\n");
+        outputStream.write("        multimap = ArrayListMultimap.create();\n");
+        for(int i=0;i<numbMethods;i++){
+            outputStream.write("        generateConditionMap"+i+"();\n");
         }
     }
 

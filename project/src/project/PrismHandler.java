@@ -173,12 +173,31 @@ public class PrismHandler {
             }
             states.add(command);
         }
+        if(RStar.isEmpty()){
+            for (Map.Entry<Integer, String[]> entry : statesIDToValue.entrySet()) {
+                String[] stateValues = entry.getValue();
+                String command = "(";
+                for(int i = 0; i < variables.length; i++){
+                    command = command + variables[i] + "=" + stateValues[i];
+
+                    if(variables.length > i+1) command = command + " &";
+                    else command = command + ")";
+                }
+                states.add(command);
+           }
+        }
         while(cond <= 0){
             try {
 
                 // Compute cond for all states in R*, continue until cond >0
                 l = l+1;
-                String propertyString = "filter(min, P=? [F<="+ l+ "!(" + String.join("|", states) + ")], " + String.join(" | ", states) + ")";
+                String propertyString = "";
+                if(!RStar.isEmpty()){
+                    propertyString = "filter(min, P=? [F<="+ l+ "!(" + String.join("|", states) + ")], " + String.join(" | ", states) + ")";
+                }
+                else{
+                    propertyString = "filter(min, P=? [F<="+ l+ "(" + String.join("|", states) + ")], " + String.join(" | ", states) + ")";
+                }
 
                 PropertiesFile propertiesFile = prism.parsePropertiesString(modulesFile, propertyString);
                 //System.out.println(propertiesFile.getPropertyObject(0));
@@ -213,6 +232,10 @@ public class PrismHandler {
             statesIDToValue.put(stateID, stateValues);
         }
         return statesIDToValue;
+    }
+
+    public void closePrism(){
+        prism.closeDown();
     }
 
 }

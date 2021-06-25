@@ -24,9 +24,12 @@ CLASS_IMPL_FILES = $(IMPL_FILES:%.java=classes/%.class)
 DTMC_FILES := $(shell cd src && find . -name 'DTMCGenerator.java')
 CLASS_DTMC_FILES = $(DTMC_FILES:%.java=classes/%.class)
 
+LEARNING_FILES := $(shell cd src && find . -name 'Learning.java')
+CLASS_LEARNING_FILES = $(LEARNING_FILES:%.java=classes/%.class)
+
 default: all
 
-all: init $(CLASS_MODEL_FILES) init $(CLASS_IMPL_FILES) init $(CLASS_CODEGENERATOR_FILES) init $(CLASS_DTMC_FILES) init $(CLASS_FILES)
+all: init $(CLASS_MODEL_FILES) init $(CLASS_IMPL_FILES) init $(CLASS_CODEGENERATOR_FILES) init $(CLASS_DTMC_FILES) init $(CLASS_LEARNING_FILES) init $(CLASS_FILES)
 
 init:
 	@mkdir -p classes

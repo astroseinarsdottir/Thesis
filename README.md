@@ -22,9 +22,13 @@ Build the project
 * ``cd project``
 * ``make``
 
-Test the project
+## Test the project
 
 * ``make test``
 
 You will be prompted to input an absolute path to a PRISM model file.
 The model needs to be a non-probabilistic mdp and the file needs to have a .nm ending.
+
+Some example models can be found under
+
+``project/src/project/models``

@@ -1,0 +1,15 @@
+mdp
+
+module Switch
+  setting : [0..2] init 0; // 0 = off, 1 = dim, 2 = on
+
+  [] setting = 0 -> (setting'=1);
+  [] setting = 0 -> (setting'=2);
+  [] setting = 1 -> (setting'=0);
+  [] setting = 2 -> (setting'=0);
+  [] setting = 2 -> (setting'=1);
+
+endmodule
+
+
+

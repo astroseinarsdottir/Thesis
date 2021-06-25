@@ -1,0 +1,14 @@
+mdp
+
+module client
+  state : [0..1] init 0; // State of the job (inactive/active)
+  x  : [0..2] init 0; // Length of the job
+  
+  [] state = 0 & x>=1 -> (x'=1);
+
+[] state = 0 & x<=1 -> (x'=2);
+
+endmodule
+
+
+

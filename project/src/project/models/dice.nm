@@ -1,0 +1,29 @@
+mdp
+
+module Die
+
+  // Local state
+  s : [0..7] init 0;
+  // Value of the die (0 = undefined)
+  d : [0..6] init 0;
+
+  // Flipping the coins
+  [] s=0 -> (s'=1);
+  [] s=0 -> (s'=2);
+  [] s=1 -> (s'=3);
+  [] s=1 -> (s'=4);
+  [] s=2 -> (s'=5);
+  [] s=2 -> (s'=6);
+  [] s=3 -> (s'=1);
+  [] s=3 -> (s'=7) & (d'=1);
+  [] s=4 -> (s'=7) & (d'=2);
+  [] s=4 -> (s'=7) & (d'=3);
+  [] s=5 -> (s'=7) & (d'=4);
+  [] s=5 -> (s'=7) & (d'=5);
+  [] s=6 -> (s'=2);
+  [] s=6 -> (s'=7) & (d'=6);
+
+  // Absorbing state, after we've decided on the value of the die
+  [] s=7 -> (s'=7);
+	
+endmodule

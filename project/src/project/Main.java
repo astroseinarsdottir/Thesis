@@ -14,7 +14,7 @@ public class Main {
 
         Logger logger = Logger.getLogger("MyLog");
         FileHandler fh;
-        fh = new FileHandler("/project/src/project/MyLogFile.log");
+        fh = new FileHandler("./MyLogFile.log");
         logger.addHandler(fh);
         SimpleFormatter formatter = new SimpleFormatter();
         fh.setFormatter(formatter);

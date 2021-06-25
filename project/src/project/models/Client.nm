@@ -17,8 +17,6 @@ module client
   // Complete the job
   [] state=1 & task=0 -> (state'=0);
 
-  //[] state=0 | task=0 -> true;
-
 endmodule
 
 

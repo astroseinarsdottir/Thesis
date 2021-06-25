@@ -107,12 +107,10 @@ public class DTMCGenerator {
 
                 String[] newStateValues = statesIDToValue.get(j);
                 for(int s = 0; s < variables.length; s++){
-                    // TODO add the update to the variables
                     command = command + " (" + variables[s] + "'=" +newStateValues[s] + ")";
 
                     if(variables.length > s+1) command = command + " &";
                 }
-                // TODO add the update to the variables
                 needPlus = true;
             }
             command = command + ";";

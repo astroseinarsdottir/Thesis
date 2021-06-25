@@ -4,10 +4,22 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+
+        Logger logger = Logger.getLogger("MyLog");
+        FileHandler fh;
+        fh = new FileHandler("/project/src/project/MyLogFile.log");
+        logger.addHandler(fh);
+        SimpleFormatter formatter = new SimpleFormatter();
+        fh.setFormatter(formatter);
+        logger.setUseParentHandlers(false);
+
         long startTotalTime = System.currentTimeMillis();
 
         // Get the PRISM file with the non-determinist model
@@ -41,14 +53,14 @@ public class Main {
         }
         long endTime = System.currentTimeMillis();
         long duration = (endTime - startTime);
-        System.out.println("Duration of generating implementation: " + duration);
+
+        logger.info("Duration of generating implementation: " + duration);
 
         // Run the learning algorithm
         System.out.println("Running the learning algorithm for " + className);
         try {
-            //Implementation implementation= (Implementation) Class.forName("project."+className).getDeclaredConstructor().newInstance();
             Class<?> implementation = Class.forName("project."+className);
-            Learning learning = new Learning(filename, implementation);
+            Learning learning = new Learning(filename, implementation, logger);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
@@ -58,6 +70,8 @@ public class Main {
         // Generate the deterministic PRISM file and output where it is
         long endTotalTime = System.currentTimeMillis();
         long durationTotal = (endTotalTime - startTotalTime);
-        System.out.println("Duration of generating implementation: " + durationTotal);
+
+        logger.info("Total duration  " + durationTotal);
     }
+
 }

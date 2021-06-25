@@ -4,6 +4,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class Learning {
     
@@ -29,8 +30,8 @@ public class Learning {
     // Data structure to keep track of which states have already been visited in a given trace
     public HashMap<String, Integer> statesVisited = new HashMap<String, Integer>();
 
-    // Data structure to save the traces for the system
-    ArrayList<ArrayList<String>> traces;
+    // Data structure to save the traces for the system - not needed
+    //ArrayList<ArrayList<String>> traces;
 
     // Date structure to keep track of n_s
     public HashMap<String, Integer> n_s = new HashMap<String, Integer>();
@@ -59,12 +60,14 @@ public class Learning {
 
     //Implementation implementation;
     Class<?> implementation;
+    Logger logger;
 
-    public Learning(String prismFile, Class<?> implementation){
+    public Learning(String prismFile, Class<?> implementation, Logger logger){
         prismHandler = new PrismHandler(prismFile);
         originalPrismFile = prismFile;
 
         this.implementation = implementation;
+        this.logger = logger;
         performLearning();
     }
 
@@ -80,7 +83,7 @@ public class Learning {
         getModelVariables();
 
         initializeN_s();
-        traces = new ArrayList<ArrayList<String>>();
+        //traces = new ArrayList<ArrayList<String>>();
         n_ij = new int[m][m];
         initializeLearnedMatrix();
         performBackwardReachabilty();
@@ -94,10 +97,11 @@ public class Learning {
         int count = 0;
         while(notReached){
             count++;
-            // Generate a new trace for the system
 
+            // Generate a new trace for the system
             long startTrace = System.currentTimeMillis();
-            traces.add(generateTrace());
+            //traces.add(generateTrace());
+            generateTrace();
             long endTrace = System.currentTimeMillis();
             traceWatch = traceWatch + (endTrace - startTrace);
 
@@ -115,30 +119,34 @@ public class Learning {
             long endMatrix = System.currentTimeMillis();
             updateMatrixWatch = updateMatrixWatch + (endMatrix - startMatrix);
 
+            if (count % 100 == 0) {
+                System.out.println("Learning from " + count + " traces...");
+            }
+
             // Compute B (for the stopping condition)
             long startB = System.currentTimeMillis();
             computeB();
             long endB = System.currentTimeMillis();
             BWatch = BWatch + (endB - startB);
 
-            if(count % 100 == 0){
-                System.out.println("Learning from "+count+" samples...");
-            }
             long startStopCond = System.currentTimeMillis();
             notReached = !stoppingConditionReached();
             long endStopCond = System.currentTimeMillis();
             stopCondWatch = stopCondWatch + (endStopCond - startStopCond);
+
         }
 
         long endTime = System.currentTimeMillis();
         long duration = (endTime - startTime);
-        System.out.println("Duration of learning algorithm: " + duration);
-        System.out.println("Duration of generating traces: "+ traceWatch);
-        System.out.println("Duration of updating matrix: "+ updateMatrixWatch);
-        System.out.println("Duration of computing B: "+ BWatch);
-        System.out.println("Duration of computing stopping condition: "+ stopCondWatch);
 
-        /*for (double[] row : learnedMatrix)
+        logger.info("Duration of learning algorithm: " + duration);
+        logger.info("Duration of generating traces: "+ traceWatch);
+        logger.info("Duration of updating matrix: "+ updateMatrixWatch);
+        logger.info("Duration of computing B: "+ BWatch);
+        logger.info("Duration of computing stopping condition: "+ stopCondWatch);
+
+        /* Can be added in if you want to print out the learned transition matrix
+        for (double[] row : learnedMatrix)
 
             // converting each row as string
             // and then printing in a separate line
@@ -152,14 +160,17 @@ public class Learning {
             }
             System.out.println(sum);
         }*/
+        System.out.println("Total traces: " + count);
+        logger.info("Total traces: " + count);
+
         long startTime2 = System.currentTimeMillis();
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
         System.out.println("DTMC PRISM file at: "+dtmcGenerator.generateDTMC());
-        System.out.println("Total steps: " + count);
 
         long endTime2 = System.currentTimeMillis();
         long duration2 = (endTime2 - startTime2);
-        System.out.println("Duration of generating model: " + duration2);
+        //System.out.println("Duration of generating model: " + duration2);
+        logger.info("Duration of generating model: " + duration2);
     }
 
     // Perform a single simulation to create a trace for the system
@@ -240,16 +251,12 @@ public class Learning {
         B = new HashMap<>();
 
         DTMCGenerator dtmcGenerator = new DTMCGenerator(originalPrismFile, learnedMatrix, statesMapper, variables);
-        //System.out.println("DTMC Generator initialized");
         String dtmc = dtmcGenerator.generateDTMC();
-        //System.out.println("DTMC created");
 
         PrismHandler dtmcHandler = new PrismHandler(dtmc);
-        //System.out.println("PrismHandler initialized");
 
         for (String state : statesMapper.keySet()) {
             if(!isStateStochastic(Integer.parseInt(statesMapper.get(state)))) continue;
-            //System.out.println("Computing B for state: " + state+ " With Reachability: "+reachability.get(Integer.parseInt(statesMapper.get(state))));
             B.put(state, dtmcHandler.computeCond(state, statesMapper, variables, reachability.get(Integer.parseInt(statesMapper.get(state)))));
         }
         dtmcHandler.closePrism();
@@ -269,6 +276,7 @@ public class Learning {
             if(value == 0) return false;
 
             if(value < checkState(key, value)){
+
                 return false;
             }
         }
@@ -279,10 +287,6 @@ public class Learning {
         // Computation of  11/10 * B(A)^2 H∗(n_s, ε, δ/m)
 
         double h = computeH(Integer.parseInt(statesMapper.get(state)), value);
-        /*System.out.println("Checking state: " + state + " With value: " + value);
-        System.out.println("Check state: " + Math.pow( (11.0/10.0)*B.get(state), 2 )* h);
-        System.out.println("H: "+ h);
-        System.out.println("B: " + B.get(state));*/
         return Math.pow( (11.0/10.0)*B.get(state), 2 )* h;
     }
 

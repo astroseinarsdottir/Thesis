@@ -12,9 +12,21 @@ PRISM_CLASSPATH = "./classes:$(PRISM_DIR)/classes:$(PRISM_DIR)/lib/*:$(PRISM_DIR
 JAVA_FILES := $(shell cd src && find . -name '*.java')
 CLASS_FILES = $(JAVA_FILES:%.java=classes/%.class)
 
+CODEGENERATOR_FILES := $(shell cd src && find . -name 'CodeGenerator.java')
+CLASS_CODEGENERATOR_FILES = $(CODEGENERATOR_FILES:%.java=classes/%.class)
+
+MODEL_FILES := $(shell cd src && find . -name 'Model*.java')
+CLASS_MODEL_FILES = $(MODEL_FILES:%.java=classes/%.class)
+
+IMPL_FILES := $(shell cd src && find . -name 'Implementation.java')
+CLASS_IMPL_FILES = $(IMPL_FILES:%.java=classes/%.class)
+
+DTMC_FILES := $(shell cd src && find . -name 'DTMCGenerator.java')
+CLASS_DTMC_FILES = $(DTMC_FILES:%.java=classes/%.class)
+
 default: all
 
-all: init $(CLASS_FILES)
+all: init $(CLASS_MODEL_FILES) init $(CLASS_IMPL_FILES) init $(CLASS_CODEGENERATOR_FILES) init $(CLASS_DTMC_FILES) init $(CLASS_FILES)
 
 init:
 	@mkdir -p classes
